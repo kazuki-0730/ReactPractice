@@ -57,14 +57,34 @@ function Board({xIsNext, squares, onPlay }){
 }
 
 export default function Game(){
-	const [xIsNext, setxIsNext] = useState(true);
 	const [history, setHistory] = useState([Array(9).fill(null)]);//９つのnullが入った要素１の配列.
-	const currentSquares = history[history.length - 1];
+	const [currentMove, setCurrentMove] = useState(0);
+	const xIsNext = currentMove % 2 === 0;
+	const currentSquares = history[currentMove];
 
 	function handlePlay(nextSquares){
-		setHistory([...history, nextSquares]);//...history はスプレッド構文であり、「history のすべての項目をここに列挙せよ.
-		setxIsNext(!xIsNext);
+		const nextHistory = [...history.slice(0, currentMove+1), nextSquares];
+		setHistory(nextHistory);//...history はスプレッド構文であり、「history のすべての項目をここに列挙せよ.
+		setCurrentMove(nextHistory.length-1);
 	}
+
+	function jumpTo(nextMove){
+		setCurrentMove(nextMove);
+	}
+
+	const moves = history.map((squares, move)=>{//squaresでhistoryの各要素,moveはインデックス.
+		let description;
+		if (move > 0){
+			description = 'Go to move #' + move;
+		}else{
+			description = 'Go to game start';
+		}
+		return(
+			<li key={move}>
+				<button onClick = {() => jumpTo(move)}>{description}</button>
+			</li>
+		);
+	});
 
 	return(
 		<div className="game">
@@ -72,7 +92,7 @@ export default function Game(){
 				<Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
 			</div>
 			<div className="game-info">
-				<ol>{/*TODO*/}</ol>
+				<ol>{moves}</ol>
 			</div>
 		</div>
 	);
